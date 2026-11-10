@@ -6,13 +6,25 @@ someone to tap Accept and then copies the file. So `send` hands the transfer to 
 process that runs `quickshare send` and announces the result, the way omarchy-tailscale-send
 does for Taildrop, and answers Flea at once.
 """
+import hashlib
 import json
 import os
+import platform
 import shutil
 import subprocess
 import sys
+import urllib.request
 
 BROWSE_SECONDS = "2"
+
+# The quickshare release this plugin version runs. Updating the plugin moves both together.
+CLI_VERSION = "0.1.0"
+CLI_SHA256 = {
+    "x86_64": "7e4d70e40dc05026459fb806272975c06d54756f21d2d43913d43702b5214597",
+    "aarch64": "69b1e30b43477320909f9d324fb97e6d95c3c65ac9189d64fc615a8fdfd390c5",
+}
+CLI_URL = "https://github.com/JaxonWright/quickshare/releases/download/v{version}/quickshare-{arch}-linux"
+BIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bin")
 GLYPH = "󰄜"
 
 # What `quickshare --json send` ends with, and the notification each result becomes.
@@ -24,18 +36,45 @@ RESULTS = {
 }
 
 
+class Unavailable(Exception):
+    """quickshare could not be found or downloaded; the message is shown as a menu row."""
+
+
+def download(arch, path):
+    url = CLI_URL.format(version=CLI_VERSION, arch=arch)
+    try:
+        with urllib.request.urlopen(url, timeout=20) as response:
+            data = response.read(64 * 1024 * 1024)
+    except OSError as error:
+        raise Unavailable("Could not download quickshare") from error
+    if hashlib.sha256(data).hexdigest() != CLI_SHA256[arch]:
+        raise Unavailable("Downloaded quickshare failed its checksum")
+    os.makedirs(BIN_DIR, exist_ok=True)
+    partial = path + ".partial"
+    with open(partial, "wb") as file:
+        file.write(data)
+    os.chmod(partial, 0o755)
+    os.replace(partial, path)
+
+
 def quickshare():
-    found = shutil.which("quickshare")
-    if found:
+    arch = platform.machine()
+    if arch in CLI_SHA256:
+        path = os.path.join(BIN_DIR, f"quickshare-{CLI_VERSION}")
+        if not os.access(path, os.X_OK):
+            download(arch, path)
+        return path
+    found = shutil.which("quickshare") or os.path.expanduser("~/.local/bin/quickshare")
+    if os.access(found, os.X_OK):
         return found
-    local = os.path.expanduser("~/.local/bin/quickshare")
-    return local if os.access(local, os.X_OK) else None
+    raise Unavailable(f"No quickshare build for {arch}")
 
 
 def targets():
-    program = quickshare()
-    if not program:
-        return [{"id": "missing", "label": "Install quickshare to send", "state": "missing"}]
+    try:
+        program = quickshare()
+    except Unavailable as problem:
+        return [{"id": "unavailable", "label": str(problem), "state": "unavailable"}]
     try:
         run = subprocess.run([program, "--json", "browse", "--timeout", BROWSE_SECONDS],
                              capture_output=True, text=True, timeout=20)
@@ -61,8 +100,10 @@ def send(target, paths):
         raise ValueError("Select at least one file.")
     if any(os.path.isdir(p) for p in paths):
         raise ValueError("Quick Share sends files, not folders.")
-    if not quickshare():
-        raise ValueError("quickshare is not installed.")
+    try:
+        quickshare()
+    except Unavailable as problem:
+        raise ValueError(f"{problem}.") from problem
     subprocess.Popen([sys.executable, os.path.abspath(__file__), "--deliver", target, *paths],
                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                      start_new_session=True)

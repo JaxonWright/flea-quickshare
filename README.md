@@ -7,7 +7,7 @@ The plugin does no networking itself. It calls the [quickshare](https://github.c
 ## Requirements
 
 - Flea 0.4.0 or newer.
-- `quickshare` on `PATH` or in `~/.local/bin`. See its README for building it and for the Pixel Wi-Fi workaround.
+- Linux on x86_64 or aarch64 with glibc 2.35 or newer. On other architectures, build `quickshare` and put it on `PATH`.
 - Python 3, which Flea already depends on.
 
 ## Install
@@ -17,7 +17,13 @@ flea plugin add https://github.com/JaxonWright/flea-quickshare
 flea plugin enable quickshare.send
 ```
 
-Restart Flea if a window was already open. To update, run `flea plugin update quickshare.send`.
+Restart Flea if a window was already open. That is the whole install. The first time Flea asks for devices, the plugin downloads the [quickshare](https://github.com/JaxonWright/quickshare) release it pins, about 5 MB, into its own `bin/` folder, and checks it against a SHA-256 written in `plugin.py`. A download that fails or does not match shows as one unavailable row in the menu, and the plugin tries again the next time the menu opens.
+
+To update, run `flea plugin update quickshare.send`. A plugin update also moves the pinned quickshare version, so the two always match.
+
+Sending needs no firewall rule, because this computer opens every connection. Only `quickshare receive`, which runs outside Flea, needs one.
+
+On a Pixel 10 or newer, Wi-Fi may drop when the Quick Share sheet opens. See [the quickshare README](https://github.com/JaxonWright/quickshare#pixel-10-and-newer-drop-wi-fi-when-quick-share-opens) for the fix. To check the setup, run `~/.config/flea/plugins/quickshare.send/bin/quickshare-0.1.0 doctor`.
 
 ## How it behaves
 

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "quickshare.send",
   "name": "Quick Share",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Jaxon Wright",
   "license": "GPL-3.0-only",
   "description": "Send files to nearby Android devices with Quick Share.",
