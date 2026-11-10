@@ -2,7 +2,7 @@
 
 A [Flea](https://github.com/thisisgm/flea) plugin that sends files to nearby Android devices with Quick Share. Select files, open the file menu, and choose a device under **Quick Share**.
 
-The plugin does no networking itself. It calls the [quickshare](https://github.com/JaxonWright/quickshare) command, the same way Flea's Taildrop row calls `tailscale`. Any other front end, such as Flea's terminal interface or an Omarchy bar widget, can call that command too.
+The plugin does no networking itself. It calls the [quickshare](https://github.com/JaxonWright/quickshare) command, the same way Flea's Taildrop row calls `tailscale`. The Quick Share row appears in Flea's window. Flea's terminal interface (`flea --tui`) does not draw plugin send rows yet, so it has no Quick Share row.
 
 ## Requirements
 
