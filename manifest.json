@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "quickshare.send",
   "name": "Quick Share",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Jaxon Wright",
   "license": "GPL-3.0-only",
   "mark": "mark.svg",
