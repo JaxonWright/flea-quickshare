@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/header.svg" width="264" height="80" alt="Quick Share + Flea">
+  <img src="assets/header.svg" width="216" height="80" alt="Quick Share + Flea">
 </p>
 
 # flea-quickshare
