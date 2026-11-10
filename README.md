@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/header.svg" width="264" height="80" alt="Quick Share + Flea">
+</p>
+
 # flea-quickshare
 
 A [Flea](https://github.com/thisisgm/flea) plugin that sends files to nearby Android devices with Quick Share. Select files, open the file menu, and choose a device under **Quick Share**.
@@ -36,3 +40,5 @@ The plugin refuses folders, because Quick Share sends files.
 ## License
 
 GPL-3.0-only, to match quickshare. See `LICENSE`.
+
+The Flea mark in `assets/header.svg` is copied from [Flea](https://github.com/thisisgm/flea), Copyright (c) 2026 GM, under the MIT license in `assets/FLEA-LICENSE`. Quick Share is a trademark of Google. The Quick Share mark in `assets/header.svg` and `mark.svg` is a tracing of Google's icon, and this project is not affiliated with Google.
