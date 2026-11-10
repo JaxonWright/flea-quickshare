@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "quickshare.send",
+  "name": "Quick Share",
+  "version": "0.1.0",
+  "author": "Jaxon Wright",
+  "license": "GPL-3.0-only",
+  "description": "Send files to nearby Android devices with Quick Share.",
+  "kinds": ["send-target"],
+  "sendTargets": {"label": "Quick Share", "glyph": "smartphone", "refreshSec": 10},
+  "access": ["selection", "network", "exec:quickshare"],
+  "entryPoints": {"run": "plugin.py"}
+}
