@@ -26,6 +26,8 @@ CLI_SHA256 = {
 CLI_URL = "https://github.com/JaxonWright/quickshare/releases/download/v{version}/quickshare-{arch}-linux"
 BIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bin")
 GLYPH = "󰄜"
+# quickshare declines a transfer its --ask program has not answered within 60 seconds.
+ASK_SECONDS = 55
 
 # What `quickshare --json send` ends with, and the notification each result becomes.
 RESULTS = {
@@ -138,6 +140,21 @@ def deliver(target, paths):
     notify(title.format(name=target), reason if code == "failed" and reason else what, urgency)
 
 
+def ask():
+    """Ask whether to accept the transfer quickshare describes in the environment. 0 accepts."""
+    files = [name for name in os.environ.get("QUICKSHARE_FILES", "").split("\n") if name]
+    what = files[0] if len(files) == 1 else f"{len(files)} files"
+    question = f"{os.environ['QUICKSHARE_FROM']} wants to send {what} · PIN {os.environ.get('QUICKSHARE_PIN', '')}"
+    try:
+        run = subprocess.run(["timeout", str(ASK_SECONDS), "notify-send", "--app-name=Quick Share",
+                              f"--expire-time={ASK_SECONDS * 1000}", "--action=accept=Accept",
+                              "--action=decline=Decline", "--", "Quick Share", question],
+                             stdin=subprocess.DEVNULL, capture_output=True, text=True)
+    except OSError:
+        return 1
+    return 0 if run.stdout.strip() == "accept" else 1
+
+
 def serve():
     for line in iter(lambda: sys.stdin.buffer.readline(65538), b""):
         if len(line) > 65536:
@@ -163,7 +180,9 @@ def serve():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 3 and sys.argv[1] == "--deliver":
+    if "QUICKSHARE_FROM" in os.environ:
+        sys.exit(ask())
+    elif len(sys.argv) > 3 and sys.argv[1] == "--deliver":
         deliver(sys.argv[2], sys.argv[3:])
     else:
         serve()
