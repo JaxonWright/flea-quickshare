@@ -70,11 +70,11 @@ def download(arch, path):
     if hashlib.sha256(data).hexdigest() != CLI_SHA256[arch]:
         raise Unavailable("Downloaded quickshare failed its checksum")
     os.makedirs(BIN_DIR, exist_ok=True)
-    partial = path + ".partial"
-    with open(partial, "wb") as file:
+    # The receiver and a menu request can download at once, so each writes its own file.
+    with tempfile.NamedTemporaryFile(dir=BIN_DIR, prefix=".partial-", delete=False) as file:
         file.write(data)
-    os.chmod(partial, 0o755)
-    os.replace(partial, path)
+    os.chmod(file.name, 0o755)
+    os.replace(file.name, path)
 
 
 def quickshare():
@@ -143,9 +143,10 @@ def notify(title, body, urgency, show=None):
     if not show:
         subprocess.run([*command, "--", title, body], check=False)
         return
-    # notify-send waits until the notification closes to report the chosen action.
-    threading.Thread(target=offer_show, args=([*command, "--action=show=Show", "--", title, body], show),
-                     daemon=True).start()
+    # notify-send waits until the notification closes to report the chosen action, which can
+    # be after receiving ends, so the wait runs in its own process.
+    detach([sys.executable, os.path.abspath(__file__), "--offer-show", show,
+            *command, "--action=show=Show", "--", title, body])
 
 
 def offer_show(command, path):
@@ -427,6 +428,8 @@ if __name__ == "__main__":
         sys.exit(ask())
     elif len(sys.argv) > 3 and sys.argv[1] == "--deliver":
         deliver(sys.argv[2], sys.argv[3:])
+    elif len(sys.argv) > 3 and sys.argv[1] == "--offer-show":
+        offer_show(sys.argv[3:], sys.argv[2])
     elif sys.argv[1:] == ["--receive"]:
         receive()
     else:
