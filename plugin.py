@@ -18,10 +18,10 @@ import urllib.request
 BROWSE_SECONDS = "2"
 
 # The quickshare release this plugin version runs. Updating the plugin moves both together.
-CLI_VERSION = "0.1.0"
+CLI_VERSION = "0.3.0"
 CLI_SHA256 = {
-    "x86_64": "7e4d70e40dc05026459fb806272975c06d54756f21d2d43913d43702b5214597",
-    "aarch64": "69b1e30b43477320909f9d324fb97e6d95c3c65ac9189d64fc615a8fdfd390c5",
+    "x86_64": "f180aa7ea34a9518727be1c3f849c627ecabb30edd7be31c2de9ab2697a26d5a",
+    "aarch64": "d97b79b96f0699cc8f78dfee5890fa6f3a2a65bccae8cfdcd65e7486d5158a05",
 }
 CLI_URL = "https://github.com/JaxonWright/quickshare/releases/download/v{version}/quickshare-{arch}-linux"
 BIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bin")
