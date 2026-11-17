@@ -4,7 +4,7 @@
 
 # flea-quickshare
 
-A plugin for the [Flea](https://github.com/thisisgm/flea) Omarchy File Browser that lets you send files to nearby Android devices with native Android Quick Share. Just right-click the file and select a device under Quick Share.
+A plugin for the [Flea](https://github.com/thisisgm/flea) Omarchy File Browser that lets you send files to nearby Android devices with native Android Quick Share, and receive files from them. Just right-click the file and select a device under Quick Share. To receive, turn on **Receiving** in the plugin's settings.
 
 The plugin uses the [quickshare](https://github.com/JaxonWright/quickshare) command, which is a separate binary that does most of the actual work. That project can be used as a standalone CLI or for your own frontend project similar to Flea.
 
@@ -25,9 +25,9 @@ Restart Flea if a window was already open. The first time Flea asks for devices,
 
 To update, run `flea plugin update quickshare.send`. A plugin update also moves the pinned quickshare version, so the two always match.
 
-Sending needs no firewall rule, because this computer opens every connection. Only `quickshare receive`, which is not possible within Flea, needs one.
+Sending needs no firewall rule, because this computer opens every connection. Receiving needs TCP port 53318 open, because the phone connects to this computer.
 
-On a Pixel 10 or newer, Wi-Fi may drop when the Quick Share sheet opens. See [the quickshare README](https://github.com/JaxonWright/quickshare#pixel-10-and-newer-drop-wi-fi-when-quick-share-opens) for the fix. To check the setup, run `~/.config/flea/plugins/quickshare.send/bin/quickshare-0.1.0 doctor`.
+On a Pixel 10 or newer, Wi-Fi may drop when the Quick Share sheet opens. See [the quickshare README](https://github.com/JaxonWright/quickshare#pixel-10-and-newer-drop-wi-fi-when-quick-share-opens) for the fix. To check the setup, including the firewall port, run `~/.config/flea/plugins/quickshare.send/bin/quickshare-0.3.0 doctor`.
 
 ## Behaviour
 
@@ -36,6 +36,18 @@ When the file menu opens, the plugin runs `quickshare browse` for 2 seconds and 
 Flea stops a plugin request after 30 seconds, and a Quick Share send waits for the phone's owner to tap Accept before it copies anything. So when you choose a device, the plugin starts a separate process that runs `quickshare send`, and answers Flea at once. That process shows a desktop notification when the send ends. The notification says the files were sent, that the owner declined or cancelled, or why the send failed. It uses `omarchy-notification-send` when Omarchy is installed and `notify-send` otherwise.
 
 The plugin refuses folders because Quick Share sends files.
+
+## Receiving
+
+Open Flea's settings, choose **Quick Share** under plugins, and set **Receiving** to **Everyone for 10 Minutes**. This computer then shows up in the Quick Share sheet of nearby phones. After 10 minutes the plugin stops receiving, sets Receiving back to Off and shows a notification. Turning Receiving off or disabling the plugin stops it sooner.
+
+When a phone sends something, a notification names the phone, the files and the PIN, with **Accept** and **Decline** buttons. Check that the PIN matches the one on the phone before you accept. A transfer you do not accept within 55 seconds is declined. When the files arrive, another notification says so, and its **Show** button opens them in Flea.
+
+Files go to your Downloads folder. To use another folder, type its path in **Save received files to**, for example `~/Pictures/Phone`. The folder must already exist. A path that is not absolute, or a folder that does not exist or cannot be written, falls back to Downloads.
+
+Phones reach this computer on TCP port 53318, so the firewall must allow it. With ufw, as on Omarchy, run `sudo ufw allow 53318/tcp comment quickshare`. `quickshare doctor`, shown above, checks the port.
+
+Flea tells a plugin about a settings change only while the plugin is running, and it runs only while Flea is using it. So a change to Receiving takes effect the next time Flea talks to the plugin, for example when you open a file menu. This lasts until Flea delivers settings changes to idle plugins.
 
 ## License
 

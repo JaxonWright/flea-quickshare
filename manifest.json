@@ -2,13 +2,21 @@
   "schemaVersion": 1,
   "id": "quickshare.send",
   "name": "Quick Share",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "author": "Jaxon Wright",
   "license": "GPL-3.0-only",
   "mark": "mark.svg",
-  "description": "Send files to nearby Android devices with Quick Share.",
+  "description": "Send files to nearby Android devices and receive files from them with Quick Share.",
   "kinds": ["send-target"],
   "sendTargets": {"label": "Quick Share", "glyph": "smartphone", "refreshSec": 10},
-  "access": ["selection", "network", "exec:quickshare"],
-  "entryPoints": {"run": "plugin.py"}
+  "access": ["selection", "network", "notify", "exec:quickshare", "exec:notify-send", "exec:flea"],
+  "entryPoints": {"run": "plugin.py"},
+  "schema": [
+    {"key": "receiving", "label": "Receiving", "type": "choice",
+     "options": [{"value": "off", "label": "Off"}, {"value": "everyone", "label": "Everyone for 10 Minutes"}],
+     "defaultValue": "off",
+     "hint": "Lets nearby phones send files to this computer. TCP port 53318 must be open in the firewall."},
+    {"key": "folder", "label": "Save received files to", "type": "string", "defaultValue": "",
+     "placeholder": "~/Downloads", "hint": "Leave empty for the Downloads folder."}
+  ]
 }
